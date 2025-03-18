@@ -1,21 +1,15 @@
-import * as fs from 'fs';
-import * as zlib from 'zlib';
-import { pipeline } from 'node:stream'
+import * as fs from "fs";
+import * as zlib from "zlib";
+import { pipeline } from "node:stream/promises";
 
-function readFile(fileSrc: string) {
-    console.log("reading the file: " + fileSrc)
-    let outfile = fs.createWriteStream(`${fileSrc}.gz`)
-    if(fs.existsSync(fileSrc)) {
-        pipeline(fs.createReadStream(fileSrc), zlib.createGzip(), outfile, (err) => {
-            if(err) {
-                console.log("faile to write file: " + err)
-            } else {
-                console.log("wrote compressed file")
-            }
-        })
-    } else {
-         console.log("File not found: " + fileSrc)
-    }
+async function readFile(fileSrc: string) {
+  console.log("reading the file:", fileSrc);
+  await pipeline(
+    fs.createReadStream(fileSrc),
+    zlib.createGzip(),
+    fs.createWriteStream(`${fileSrc}.gz`),
+  );
+  console.log("done");
 }
 
-readFile(process.argv[2])
+await readFile(process.argv[2]);
